@@ -3,6 +3,8 @@ package com.demo.storeweb.controller;
 import com.demo.storeweb.dto.ProductDTO;
 import com.demo.storeweb.model.Product;
 import com.demo.storeweb.service.ProductService;
+
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -14,13 +16,16 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @Controller
-@RequestMapping("/products")
+@RequestMapping("/")
 public class ProductController {
     @Autowired
     private ProductService productService;
 
-    @GetMapping("")
-    public String showProducts(Model model) {
+    @GetMapping("/products")
+    public String showProducts(Model model,HttpSession session) {
+        if (session.getAttribute("loggedInUser") == null) {
+            return "redirect:/login";
+        }
         List<Product> products = productService.getAllProducts();
         model.addAttribute("products", products);
         return "products";
