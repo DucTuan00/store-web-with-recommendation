@@ -16,12 +16,12 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @Controller
-@RequestMapping("/")
+@RequestMapping("/products")
 public class ProductController {
     @Autowired
     private ProductService productService;
 
-    @GetMapping("/products")
+    @GetMapping("")
     public String showProducts(Model model,HttpSession session) {
         if (session.getAttribute("loggedInUser") == null) {
             return "redirect:/login";

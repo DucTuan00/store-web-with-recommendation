@@ -5,6 +5,7 @@ import com.demo.storeweb.model.User;
 import com.demo.storeweb.dto.UserLoginDTO;
 import com.demo.storeweb.service.UserService;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,23 +51,33 @@ public class UserController {
 
     @PostMapping("/login")
     public String loginUser(@Valid @ModelAttribute("user") UserLoginDTO userLoginDTO,
-                            BindingResult bindingResult, Model model, HttpSession session) {
+                            BindingResult bindingResult, Model model, HttpSession session, HttpServletRequest request) {
         if (bindingResult.hasErrors()) {
             return "login";
         }
 
-        User user = userService.findByUsernameAndPassword(userLoginDTO.getUsername(), userLoginDTO.getPassword());
-        if (user == null) {
-            model.addAttribute("loginError", "Invalid username or password");
+        if(userService.findByUsernameAndPassword(userLoginDTO.getUsername(), userLoginDTO.getPassword())) {
+            session = request.getSession();
+            session.setAttribute("loggedInUser", userService.findByUsername(userLoginDTO.getUsername()));
+            return "redirect:/products";
+        } else {
+            model.addAttribute("loginError", "Sai tài khoản hoặc mật khẩu");
             return "login";
         }
 
-        session.setAttribute("loggedInUser", user);
-        return "redirect:/products";
+//        User user = userService.findByUsernameAndPassword(userLoginDTO.getUsername(), userLoginDTO.getPassword());
+//        if (user == null) {
+//            model.addAttribute("loginError", "Invalid username or password");
+//            return "login";
+//        }
+//
+//        session.setAttribute("loggedInUser", user);
+//        return "redirect:/products";
     }
 
-    @GetMapping("/logout")
-    public String logoutUser(HttpSession session) {
+    @PostMapping("/logout")
+    public String logoutUser(HttpSession session, HttpServletRequest request) {
+        session = request.getSession();
         session.invalidate();
         return "redirect:/login";
     }

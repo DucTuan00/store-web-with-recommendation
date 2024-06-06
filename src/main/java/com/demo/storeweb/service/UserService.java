@@ -24,12 +24,13 @@ public class UserService {
         userRepository.save(user);
     }
 
-    public User findByUsernameAndPassword(String username, String password) {
-        User user = userRepository.findByUsername(username);
-        if (user != null && user.getPassword().equals(password)) {
-            return user;
-        }
-        return null;
+    public boolean findByUsernameAndPassword(String username, String password) {
+        User user = findByUsername(username);
+        return user != null && user.getPassword().equals(password);
+    }
+
+    public User findByUsername(String username) {
+        return userRepository.findByUsername(username);
     }
 
     public Set<String> getCategories() {
