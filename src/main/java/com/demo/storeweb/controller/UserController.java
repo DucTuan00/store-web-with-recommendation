@@ -51,33 +51,22 @@ public class UserController {
 
     @PostMapping("/login")
     public String loginUser(@Valid @ModelAttribute("user") UserLoginDTO userLoginDTO,
-                            BindingResult bindingResult, Model model, HttpSession session, HttpServletRequest request) {
+                            BindingResult bindingResult, Model model, HttpSession session) {
         if (bindingResult.hasErrors()) {
             return "login";
         }
 
         if(userService.findByUsernameAndPassword(userLoginDTO.getUsername(), userLoginDTO.getPassword())) {
-            session = request.getSession();
             session.setAttribute("loggedInUser", userService.findByUsername(userLoginDTO.getUsername()));
-            return "redirect:/products";
+            return "redirect:/";
         } else {
             model.addAttribute("loginError", "Sai tài khoản hoặc mật khẩu");
             return "login";
         }
-
-//        User user = userService.findByUsernameAndPassword(userLoginDTO.getUsername(), userLoginDTO.getPassword());
-//        if (user == null) {
-//            model.addAttribute("loginError", "Invalid username or password");
-//            return "login";
-//        }
-//
-//        session.setAttribute("loggedInUser", user);
-//        return "redirect:/products";
     }
 
     @PostMapping("/logout")
-    public String logoutUser(HttpSession session, HttpServletRequest request) {
-        session = request.getSession();
+    public String logoutUser(HttpSession session) {
         session.invalidate();
         return "redirect:/login";
     }

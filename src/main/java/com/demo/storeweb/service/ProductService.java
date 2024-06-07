@@ -101,4 +101,8 @@ public class ProductService {
         Product product = getProductById(id);
         productRepository.delete(product);
     }
+
+    public List<Product> searchProducts(String query) {
+        return productRepository.findByNameContainingIgnoreCase(query);
+    }
 }
