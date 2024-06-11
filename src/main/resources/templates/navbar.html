@@ -10,8 +10,9 @@
 
 <body>
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-  <div class="container-fluid">
+  <div class="container">
     <a class="navbar-brand" href="/">Trang chủ</a>
+    <a class="navbar-brand" href="javascript:void(0);" th:onclick="'openRecommendPage()'">Gợi ý sản phẩm</a>
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
       <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
         <li class="nav-item" th:if="${session.loggedInUser == null}">
@@ -35,6 +36,20 @@
     </div>
   </div>
 </nav>
+
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    var loggedInUser = /*[[${session.loggedInUser != null}]]*/ false;
+    var userId = /*[[${session.loggedInUser != null} ? ${session.loggedInUser.id} : '']]*/ '';
+    function openRecommendPage() {
+      if (!loggedInUser) {
+        window.location.href = '/login';
+      } else {
+        window.location.href = '/recommend?userId=' + userId;
+      }
+    }
+    /*]]>*/
+  </script>
 </body>
 </html>
 

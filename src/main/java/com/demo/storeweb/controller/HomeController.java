@@ -80,5 +80,13 @@ public class HomeController {
         model.addAttribute("products", products);
         return "home";
     }
+
+    @GetMapping("/recommend")
+    public String showRecommendPage(Model model, HttpSession session) {
+        List<Product> products = productService.getAllProducts();
+        model.addAttribute("products", products);
+        model.addAttribute("loggedInUser", session.getAttribute("loggedInUser"));
+        return "recommend";
+    }
 }
 
