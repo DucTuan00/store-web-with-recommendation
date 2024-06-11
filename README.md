@@ -4,4 +4,4 @@
 
 -Chạy project ở file DemoApplication.java
 
--Chạy được project không báo lỗi thì mọi người vô browser, gõ localhost:8080/products nhé
+-Chạy được project không báo lỗi thì mọi người vô browser, gõ localhost:8080 nhé
