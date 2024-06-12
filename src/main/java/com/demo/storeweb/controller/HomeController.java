@@ -28,6 +28,7 @@ public class HomeController {
     private UserOrderService orderService;
 
     private static Long tempID = null;
+    
     @GetMapping("/")
     public String showHomePage(Model model, HttpSession session) {
         List<Product> products = productService.getAllProducts();
@@ -57,7 +58,7 @@ public class HomeController {
         }
 
         UserOrder order = orderService.placeOrder(productId, loggedInUser, phone, address);
-        tempID = order.getId();
+        session.setAttribute("orderID", order.getId());
         return ResponseEntity.ok().build();
     }
 
@@ -72,8 +73,8 @@ public class HomeController {
         }
 
         // Handle the rating logic here, e.g., saving the rating information.
-        orderService.rateOrder(tempID, rating);
-
+        orderService.rateOrder((Long)session.getAttribute("orderID"), rating);
+        session.removeAttribute("orderID");
         return ResponseEntity.ok().build();
     }
 

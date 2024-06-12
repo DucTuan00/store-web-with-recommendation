@@ -20,6 +20,7 @@ public class User {
     private String password;
 
     private String favoriteCategories;
+    
     @Transient
     private Set<String> favoriteCategoriesSet = new HashSet<>();
 
