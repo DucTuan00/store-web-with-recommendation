@@ -21,7 +21,7 @@ public class Datainit implements CommandLineRunner {
             User defaultUser = new User();
             defaultUser.setUsername("admin");
             defaultUser.setPassword("admin");
-            defaultUser.setFavoriteCategories(Set.of("Electronics","Books","Clothing"));
+            defaultUser.setFavoriteCategories("Books,Electronics,Clothing");
             userRepository.save(defaultUser);
         }
     }

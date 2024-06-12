@@ -10,6 +10,7 @@
 </head>
 
 <body>
+<div th:replace="navbar"></div>
 
 <div class="container">
   <h1 class="text-center my-4">Trang quản lý sản phẩm</h1>
@@ -46,7 +47,7 @@
       <td style="white-space:nowrap">
         <a class="btn btn-primary btn-sm" th:href="@{/products/edit(id=${product.id})}">Sửa</a>
         <a class="btn btn-danger btn-sm" th:href="@{/products/delete(id=${product.id})}"
-           onclick="return confirm('Are you sure?')">Xóa</a>
+           onclick="return confirm('Bạn có chắc không?')">Xóa</a>
       </td>
     </tr>
     </tbody>

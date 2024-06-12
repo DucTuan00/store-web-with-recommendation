@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -18,6 +19,25 @@ public class User {
 
     private String password;
 
-    @ElementCollection
-    private Set<String> favoriteCategories = new HashSet<>();
+    private String favoriteCategories;
+    @Transient
+    private Set<String> favoriteCategoriesSet = new HashSet<>();
+
+    @PostLoad
+    private void postLoad() {
+        if (favoriteCategories != null) {
+            favoriteCategoriesSet = new HashSet<>(List.of(favoriteCategories.split(",")));
+        }
+    }
+
+    @PrePersist
+    @PreUpdate
+    private void prePersistOrUpdate() {
+        if (favoriteCategoriesSet != null) {
+            favoriteCategories = String.join(",", favoriteCategoriesSet);
+        }
+    }
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private List<UserOrder> orders;
 }

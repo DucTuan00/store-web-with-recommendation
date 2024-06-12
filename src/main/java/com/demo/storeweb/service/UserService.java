@@ -20,7 +20,7 @@ public class UserService {
         User user = new User();
         user.setUsername(registrationDTO.getUsername());
         user.setPassword(registrationDTO.getPassword());  // In real applications, encrypt the password
-        user.setFavoriteCategories(registrationDTO.getFavoriteCategories());
+        user.setFavoriteCategoriesSet(registrationDTO.getFavoriteCategories());
         userRepository.save(user);
     }
 

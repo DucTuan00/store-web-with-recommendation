@@ -1,5 +1,7 @@
 package com.demo.storeweb.model;
 
+import java.util.List;
+
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -25,4 +27,7 @@ public class Product {
     @Column(columnDefinition = "TEXT") //Kiểu dữ liệu cột description là text
     private String description;
     private String imageFileName;
+
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
+    private List<UserOrder> orders;
 }

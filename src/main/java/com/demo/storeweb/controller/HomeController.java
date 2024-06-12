@@ -1,8 +1,9 @@
 package com.demo.storeweb.controller;
 
-import com.demo.storeweb.dto.UserLoginDTO;
 import com.demo.storeweb.model.Product;
 import com.demo.storeweb.model.User;
+import com.demo.storeweb.model.UserOrder;
+import com.demo.storeweb.service.UserOrderService;
 import com.demo.storeweb.service.ProductService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +24,10 @@ public class HomeController {
     @Autowired
     private ProductService productService;
 
+    @Autowired
+    private UserOrderService orderService;
+
+    private static Long tempID = null;
     @GetMapping("/")
     public String showHomePage(Model model, HttpSession session) {
         List<Product> products = productService.getAllProducts();
@@ -42,7 +47,7 @@ public class HomeController {
     @PostMapping("/order")
     @ResponseBody
     public ResponseEntity<Void> placeOrder(
-            @RequestParam Long productId,
+            @RequestParam Integer productId,
             @RequestParam String phone,
             @RequestParam String address,
             HttpSession session) {
@@ -51,16 +56,14 @@ public class HomeController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        // Handle the order logic here, e.g., saving the order information.
-        // productService.placeOrder(productId, loggedInUser.getId(), phone, address);
-
+        UserOrder order = orderService.placeOrder(productId, loggedInUser, phone, address);
+        tempID = order.getId();
         return ResponseEntity.ok().build();
     }
 
     @PostMapping("/rate")
     @ResponseBody
     public ResponseEntity<Void> rateProduct(
-            @RequestParam Long productId,
             @RequestParam int rating,
             HttpSession session) {
         User loggedInUser = (User) session.getAttribute("loggedInUser");
@@ -69,7 +72,7 @@ public class HomeController {
         }
 
         // Handle the rating logic here, e.g., saving the rating information.
-        // productService.rateProduct(productId, loggedInUser.getId(), rating);
+        orderService.rateOrder(tempID, rating);
 
         return ResponseEntity.ok().build();
     }
@@ -80,13 +83,4 @@ public class HomeController {
         model.addAttribute("products", products);
         return "home";
     }
-
-    @GetMapping("/recommend")
-    public String showRecommendPage(Model model, HttpSession session) {
-        List<Product> products = productService.getAllProducts();
-        model.addAttribute("products", products);
-        model.addAttribute("loggedInUser", session.getAttribute("loggedInUser"));
-        return "recommend";
-    }
 }
-
