@@ -100,14 +100,20 @@ def recommend(user_id, num_recommendations):
     model.fit(combined_matrix.values)
 
     user_index = combined_matrix.index.get_loc(user_id)
-    distances, indices = model.kneighbors([combined_matrix.iloc[user_index]], n_neighbors=num_recommendations + 1)
+    distances, indices = model.kneighbors([combined_matrix.iloc[user_index]], n_neighbors=len(combined_matrix))
+
     recommended_users = [combined_matrix.index[i] for i in indices.flatten() if i != user_index]
+    
+    user_orders = df_orders[df_orders['user_id'] == user_id]['product_id'].tolist()
     
     recommended_products = []
     for rec_user in recommended_users:
-        user_orders = df_orders[df_orders['user_id'] == rec_user]
-        recommended_products.extend(user_orders['product_id'].tolist())
-    
+        rec_user_orders = df_orders[df_orders['user_id'] == rec_user]['product_id'].tolist()
+        recommended_products.extend([prod for prod in rec_user_orders if prod not in user_orders])
+        
+        if len(recommended_products) >= num_recommendations:
+            break
+
     recommended_products = list(set(recommended_products))[:num_recommendations]
     return recommended_products
 
@@ -126,5 +132,5 @@ def get_recommendations():
     
     return jsonify(recommendations)
 
-if __name__ == '__main__': 
+if __name__ == '__main__':
     app.run(port=5000)
