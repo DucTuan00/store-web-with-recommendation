@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Recommendations</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}" />
+</head>
+<body>
+    <h1>Recommended Products for You</h1>
+    <div th:if="${recommendedProducts.empty}">
+        <p>No recommendations available at the moment.</p>
+    </div>
+    <div th:unless="${recommendedProducts.empty}">
+        <ul>
+            <li th:each="product : ${recommendedProducts}">
+                <div>
+                    <h2 th:text="${product.name}"></h2>
+                    <img th:src="@{/images/}" th:alt="${product.name}" />
+                    <p th:text="${product.description}"></p>
+                    <p><strong>Category:</strong> <span th:text="${product.category}"></span></p>
+                    <p><strong>Brand:</strong> <span th:text="${product.brand}"></span></p>
+                    <p><strong>Price:</strong> <span th:text="${product.price}"></span></p>
+                </div>
+            </li>
+        </ul>
+    </div>
+</body>
+</html>

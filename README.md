@@ -5,3 +5,7 @@
 -Chạy project ở file DemoApplication.java
 
 -Chạy được project không báo lỗi thì mọi người vô browser, gõ localhost:8080 nhé
+
+-Cài các thư viện liên quan bằng script install_packages.py nhé
+
+-Chạy project xong nhớ chạy file recommendation_system.py để chạy server gợi ý nhé 

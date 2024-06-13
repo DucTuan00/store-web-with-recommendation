@@ -45,7 +45,7 @@
       if (!loggedInUser) {
         window.location.href = '/login';
       } else {
-        window.location.href = '/recommend?userId=' + userId;
+        window.location.href = '/recommendations?user_id=' + userId + '&num_recommendations=2';
       }
     }
     /*]]>*/

@@ -20,7 +20,7 @@ public class UserService {
         User user = new User();
         user.setUsername(registrationDTO.getUsername());
         user.setPassword(registrationDTO.getPassword());  // In real applications, encrypt the password
-        user.setFavoriteCategories(registrationDTO.getFavoriteCategories());
+        user.setFavoriteCategoriesSet(registrationDTO.getFavoriteCategories());
         userRepository.save(user);
     }
 
@@ -35,6 +35,7 @@ public class UserService {
 
     public Set<String> getCategories() {
         // This method should return the list of available categories
-        return Set.of("Laptop", "PC", "Valorant"); // Example categories
+        return Set.of("Laptop", "PC", "Valorant", "Electronics",
+                     "Clothing", "Books", "Music", "Movies"); // Example categories
     }
 }
