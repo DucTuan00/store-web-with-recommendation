@@ -48,7 +48,7 @@ public class RecommendationController {
 
         model.addAttribute("recommendedProducts", recommendedProducts);
 
-        return "recommendations";
+        return "recommend";
     }
 }
 
