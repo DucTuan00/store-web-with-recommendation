@@ -26,7 +26,7 @@ public class UserController {
     @GetMapping("/register")
     public String showRegistrationForm(Model model) {
         model.addAttribute("user", new UserRegistrationDTO());
-        model.addAttribute("categories", List.of("Laptop", "PC")); // Example method to get categories
+        model.addAttribute("categories", userService.getCategories()); // Example method to get categories
         return "register";
         
     }

@@ -35,6 +35,7 @@ public class UserService {
 
     public Set<String> getCategories() {
         // This method should return the list of available categories
-        return Set.of("Laptop", "PC", "Valorant"); // Example categories
+        return Set.of("Laptop", "PC", "Valorant", "Electronics",
+                     "Clothing", "Books", "Music", "Movies"); // Example categories
     }
 }
