@@ -1,80 +1,126 @@
 import pandas as pd
-from sqlalchemy import create_engine
-import sys
-import json
 from sklearn.neighbors import NearestNeighbors
+from sqlalchemy import create_engine, Column, Integer, String, ForeignKey, Float, Text, DateTime
+from sqlalchemy.orm import declarative_base
+from sqlalchemy.orm import relationship, sessionmaker
+from flask import Flask, request, jsonify
+import datetime
 
-# Database connection details
-DB_USERNAME = 'postgres'
-DB_PASSWORD = '123456'
-DB_HOST = 'localhost'
-DB_PORT = '5432'
-DB_NAME = 'student'
-DB_TABLE = 'test'
+Base = declarative_base()
 
-# Connect to PostgreSQL database using SQLAlchemy
-def get_data_from_db():
-    try:
-        engine = create_engine(f'postgresql://{DB_USERNAME}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}')
-        query = f"""
-        SELECT user_id, item_id, rating
-        FROM {DB_TABLE}
-        """
-        df = pd.read_sql(query, engine)
-        return df
-    except Exception as e:
-        return {"error": str(e)}
+class User(Base):
+    __tablename__ = 'user'
+    id = Column(Integer, primary_key=True)
+    username = Column(String(50), nullable=False)
+    password = Column(String(250), nullable=False)
+    favorite_categories = Column(String(250), nullable=True)
+    orders = relationship("UserOrder", back_populates="user")
 
-data = {
-    'user_id': [1, 1, 2, 2, 3, 3, 4],
-    'item_id': [1, 2, 1, 3, 1, 2, 3],
-    'rating': [5, 3, 4, 2, 2, 5, 5],
-    'category': ['Electronics', 'Books', 'Electronics', 'Clothing', 'Electronics', 'Books', 'Clothing']
+class Product(Base):
+    __tablename__ = 'products'
+    id = Column(Integer, primary_key=True)
+    name = Column(String(100), nullable=False)
+    brand = Column(String(50), nullable=False)
+    category = Column(String(50), nullable=False)
+    price = Column(String(50), nullable=False)
+    description = Column(Text, nullable=True)
+    imageFileName = Column("image_file_name",String(250), nullable=True)
+    orders = relationship("UserOrder", back_populates="product")
+
+class UserOrder(Base):
+    __tablename__ = 'user_order'
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey('user.id'), nullable=False)
+    product_id = Column(Integer, ForeignKey('products.id'), nullable=False)
+    phone = Column(String(50), nullable=True)
+    address = Column(String(250), nullable=True)
+    order_date = Column(DateTime, default=datetime.datetime.utcnow)
+    rating = Column(Integer, nullable=True)
+    user = relationship("User", back_populates="orders")
+    product = relationship("Product", back_populates="orders")
+
+# Create an engine
+engine = create_engine('mysql+mysqlconnector://root:123456@localhost:3306/storeweb')
+
+# Create all tables
+Base.metadata.create_all(engine)
+
+# Create a configured "Session" class
+Session = sessionmaker(bind=engine)
+
+# Create a Session
+session = Session()
+
+# Fetch user data
+users = session.query(User).all()
+user_data = {
+    'user_id': [user.id for user in users],
+    'favorite_categories': [user.favorite_categories.split(',') if user.favorite_categories else [] for user in users]
 }
+df_users = pd.DataFrame(user_data)
 
-user_preferences = {
-    1: ['Electronics', 'Books'],
-    2: ['Electronics'],
-    3: ['Books'],
-    4: ['Clothing']
+
+# Fetch order data
+orders = session.query(UserOrder).all()
+order_data = {
+    'user_id': [order.user_id for order in orders],
+    'product_id': [order.product_id for order in orders],
+    'rating': [order.rating for order in orders]
 }
-    
-# Fetch data from database
-data_result = get_data_from_db()
-if "error" in data_result:
-    print(json.dumps(data_result))
-    sys.exit(1)
+df_orders = pd.DataFrame(order_data)
 
-df = data_result
-user_item_matrix = df.pivot(index='user_id', columns='item_id', values='rating').fillna(0)
 
+# User-item matrix for ratings
+user_item_matrix = df_orders.pivot(index='user_id', columns='product_id', values='rating').fillna(0)
+
+# User-category matrix for preferences
+all_categories = set(cat for sublist in df_users['favorite_categories'] for cat in sublist)
+all_categories = list(all_categories)
+user_category_matrix = pd.DataFrame(0, index=df_users['user_id'], columns=all_categories)
+for index, row in df_users.iterrows():
+    user_category_matrix.loc[row['user_id'], row['favorite_categories']] = 1
+
+# Combined matrix
+combined_matrix = user_item_matrix.copy()
+for category in user_category_matrix.columns:
+    combined_matrix[category] = user_category_matrix[category]
+
+# Model training
 model = NearestNeighbors(metric='cosine', algorithm='brute')
-model.fit(user_item_matrix.values)
+model.fit(combined_matrix.values)
 
 def recommend(user_id, num_recommendations):
-    if user_id not in user_item_matrix.index:
-        return {"error": f"User ID {user_id} not found."}
+    if user_id not in combined_matrix.index:
+        return []
 
-    user_index = user_item_matrix.index.get_loc(user_id)
-    total_users = user_item_matrix.shape[0]
+    user_index = combined_matrix.index.get_loc(user_id)
+    distances, indices = model.kneighbors([combined_matrix.iloc[user_index]], n_neighbors=num_recommendations + 1)
+    recommended_users = [combined_matrix.index[i] for i in indices.flatten() if i != user_index]
+    
+    recommended_products = []
+    for rec_user in recommended_users:
+        user_orders = df_orders[df_orders['user_id'] == rec_user]
+        recommended_products.extend(user_orders['product_id'].tolist())
+    
+    recommended_products = list(set(recommended_products))[:num_recommendations]
+    return recommended_products
 
-    if num_recommendations >= total_users:
-        num_recommendations = total_users - 1
+app = Flask(__name__)
 
-    try:
-        distances, indices = model.kneighbors([user_item_matrix.iloc[user_index]], n_neighbors=num_recommendations + 1)
-        recommendations = [user_item_matrix.columns[i] for i in indices.flatten() if i != user_index]
-        return list(map(int, recommendations[:num_recommendations]))  # Convert to native int type
-       
-    except Exception as e:
-        return {"error": str(e)}
+@app.route('/recommend', methods=['GET'])
+def get_recommendations():
+    user_id = int(request.args.get('user_id'))
+    num_recommendations = int(request.args.get('num_recommendations'))
+    recommendations = recommend(user_id, num_recommendations)
+    
+    products = session.query(Product).filter(Product.id.in_(recommendations)).all()
+    recommended_products = [{
+        'product_id': product.id,
+        'product_name': product.name,
+        'category': product.category
+    } for product in products]
+    
+    return jsonify(recommended_products)
 
-if __name__ == "__main__":
-    try:
-        user_id = int(sys.argv[1])
-        num_recommendations = int(sys.argv[2])
-        recommendations = recommend(user_id, num_recommendations)
-        print(json.dumps(recommendations))
-    except Exception as e:
-        print(json.dumps({"error": str(e)}))
-        sys.exit(1)
+if __name__ == '__main__':
+    app.run(port=5000)

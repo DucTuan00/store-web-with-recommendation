@@ -26,8 +26,6 @@ public class HomeController {
 
     @Autowired
     private UserOrderService orderService;
-
-    private static Long tempID = null;
     
     @GetMapping("/")
     public String showHomePage(Model model, HttpSession session) {
