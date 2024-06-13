@@ -110,17 +110,19 @@ app = Flask(__name__)
 @app.route('/recommend', methods=['GET'])
 def get_recommendations():
     user_id = int(request.args.get('user_id'))
+    # user_id = 3
+    # num_recommendations = 2
     num_recommendations = int(request.args.get('num_recommendations'))
     recommendations = recommend(user_id, num_recommendations)
     
-    products = session.query(Product).filter(Product.id.in_(recommendations)).all()
-    recommended_products = [{
-        'product_id': product.id,
-        'product_name': product.name,
-        'category': product.category
-    } for product in products]
+    # products = session.query(Product).filter(Product.id.in_(recommendations)).all()
+    # recommended_products = [{
+    #     'product_id': product.id,
+    #     'product_name': product.name,
+    #     'category': product.category
+    # } for product in products]
     
-    return jsonify(recommended_products)
+    return jsonify(recommendations)
 
 if __name__ == '__main__':
     app.run(port=5000)
