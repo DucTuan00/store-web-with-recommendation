@@ -82,6 +82,22 @@
       }
     }).catch(error => console.error('Error:', error));
   });
+
+  document.getElementById('ratingForm').addEventListener('submit', function(event) {
+    event.preventDefault();
+    var form = event.target;
+    var formData = new FormData(form);
+    fetch(form.action, {
+      method: 'POST',
+      body: formData
+    }).then(response => {
+      if (response.ok) {
+        window.location.href = "/";
+      } else {
+        console.error('Failed to submit rating:', response.statusText);
+      }
+    }).catch(error => console.error('Error:', error));
+  });
   /*]]>*/
 </script>
 </body>

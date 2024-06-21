@@ -39,7 +39,8 @@ class UserOrder(Base):
     product = relationship("Product", back_populates="orders")
 
 # Create an engine
-engine = create_engine('mysql+mysqlconnector://root:123456@localhost:3306/storeweb')
+engine = create_engine('mysql+mysqlconnector://root:123456@localhost:3306/storeweb',
+                        isolation_level="READ UNCOMMITTED")
 
 # Create all tables
 Base.metadata.create_all(engine)
@@ -73,6 +74,8 @@ def fetch_data():
     # Ensure unique user-product pairs
     df_orders = df_orders.groupby(['user_id', 'product_id']).rating.mean().reset_index()
 
+    print(order_data)
+
     # User-item matrix for ratings
     user_item_matrix = df_orders.pivot(index='user_id', columns='product_id', values='rating').fillna(0)
 
@@ -88,13 +91,23 @@ def fetch_data():
     for category in user_category_matrix.columns:
         combined_matrix[category] = user_category_matrix[category]
 
-    return combined_matrix, df_orders
+    return combined_matrix, df_orders, df_users
 
 def recommend(user_id, num_recommendations):
-    combined_matrix, df_orders = fetch_data()
+    combined_matrix, df_orders, df_users = fetch_data()
 
     if user_id not in combined_matrix.index:
-        return []
+        # If the user hasn't rated any product, recommend based on favorite categories or popular products
+        user_favorite_categories = df_users[df_users['user_id'] == user_id]['favorite_categories'].values[0]
+        if not user_favorite_categories:
+            # Default to popular products if no favorite categories
+            popular_products = df_orders['product_id'].value_counts().index.tolist()
+            return popular_products[:num_recommendations]
+
+        # Recommend products based on favorite categories
+        products = session.query(Product).filter(Product.category.in_(user_favorite_categories)).all()
+        recommended_products = [product.id for product in products]
+        return recommended_products[:num_recommendations]
 
     model = NearestNeighbors(metric='cosine', algorithm='brute')
     model.fit(combined_matrix.values)
@@ -130,7 +143,9 @@ def get_recommendations():
         'category': product.category
     } for product in products]
     
-    return jsonify(recommendations)
+    # return jsonify(recommended_products)
+    print(recommendations)
+    return recommendations
 
 if __name__ == '__main__':
     app.run(port=5000)
