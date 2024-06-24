@@ -5,12 +5,24 @@
     .nav-link {
         margin-right: 80px;
     }
+
+    .logo {
+        height: 40px;
+        vertical-align: middle;
+    }
+
+    .bg-dark {
+        background-color: black !important;
+    }
   </style>
 </head>
 
 <body>
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
   <div class="container">
+    <a class="navbar-brand" href="/">
+      <img class="logo" src="/logo/1519457540714.jpg">
+    </a>
     <a class="navbar-brand" href="/">Trang chủ</a>
     <a class="navbar-brand" href="javascript:void(0);" th:onclick="'openRecommendPage()'">Gợi ý sản phẩm</a>
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
