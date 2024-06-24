@@ -10,6 +10,7 @@ packages = [
     "scikit-learn",
     "sqlalchemy",
     "pandas"
+    "mysql-connector-python"
 ]
 
 # Install each package
