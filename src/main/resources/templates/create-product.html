@@ -50,6 +50,8 @@
             <select class="form-select" th:field="${productDTO.category}">
               <option value="Gaming">Gaming</option>
               <option value="Ultrabook">Ultrabook</option>
+              <option value="SSD">SSD</option>
+              <option value="RAM">RAM</option>
             </select>
             <p th:if="${#fields.hasErrors('category')}" th:errorclass="text-danger"
                th:errors="${productDTO.category}"></p>
