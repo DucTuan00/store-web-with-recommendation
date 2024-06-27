@@ -1,0 +1,38 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <head>
+    <title>Profile</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  </head>
+  <style>
+        .form-group {
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+<div th:replace="navbar"></div>
+
+<div class="container">
+  <div class="row">
+    <div class="col-md-6 mx-auto">
+      <h1 class="text-center">Thông tin cá nhân</h1>
+      <form>
+        <div class="form-group">
+          <label for="username">Tài khoản:</label>
+          <input type="text" class="form-control" id="username" th:value="${user.username}" readonly />
+        </div>
+        <div class="form-group">
+          <label for="favoriteCategories">Loại sản phẩm yêu thích:</label>
+          <ul>
+            <li th:each="category : ${user.favoriteCategories}" th:text="${category}"></li>
+          </ul>
+        </div>
+      </form>
+      <a href="/" class="btn btn-primary">Trở về trang chủ</a>
+    </div>
+  </div>
+</div>
+</body>
+</html>

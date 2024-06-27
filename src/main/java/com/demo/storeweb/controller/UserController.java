@@ -70,7 +70,12 @@ public class UserController {
         session.invalidate();
         return "redirect:/login";
     }
-    
-    
+
+    @GetMapping("/profile")
+    public String showProfile(Model model, HttpSession session) {
+        User loggedInUser = (User) session.getAttribute("loggedInUser");
+        model.addAttribute("user", loggedInUser);
+        return "profile";
+    }
 }
 
